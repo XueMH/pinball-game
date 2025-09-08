@@ -135,54 +135,174 @@ export class PlayGround {
       }
     );
     /********************************* ⏸️⏸️⏸️创建轨道墙 *********************************/
-    /********************************** 📌📌📌创建反弹柱子和边界引导障碍物 **********************************/
-    /** 上方粗柱子曲线参数1 */
-    const curve_points_1 = {
+    /********************************** 📌📌📌创建反弹柱子 **********************************/
+    /** 粗柱子曲线参数1 */
+    const thick_pillar_curve_points_1 = {
       p0: { x: 66, y: 200 },
       p1: { x: (width - 62) / 2, y: 160 },
       p2: { x: width - 128, y: 200 },
     };
-    /** 上方粗柱子曲线参数2 */
-    const curve_points_2 = {
+    /** 粗柱子曲线参数2 */
+    const thick_pillar_curve_points_2 = {
       p0: { x: 120, y: 280 },
       p1: { x: (width - 62) / 2, y: 280 },
       p2: { x: width - 182, y: 280 },
     };
-    /** 上方粗柱子曲线参数3 */
-    const curve_points_3 = {
+    /** 粗柱子曲线参数3 */
+    const thick_pillar_curve_points_3 = {
       p0: { x: 66, y: 360 },
       p1: { x: (width - 42) / 2, y: 400 },
       p2: { x: width - 128, y: 360 },
     };
+    /** 细柱子曲线参数1 */
+    const thin_pillar_curve_points_1 = {
+      p0: { x: 75, y: 460 },
+      p1: { x: (width - 62) / 2, y: 480 },
+      p2: { x: width - 137, y: 460 },
+    };
+    /** 细柱子曲线参数2 */
+    const thin_pillar_curve_points_2 = {
+      p0: { x: 55, y: 550 },
+      p1: { x: (width - 62) / 2, y: 560 },
+      p2: { x: width - 117, y: 550 },
+    };
+    /** 细柱子曲线参数3 */
+    const thin_pillar_curve_points_3 = {
+      p0: { x: 75, y: 640 },
+      p1: { x: (width - 62) / 2, y: 640 },
+      p2: { x: width - 137, y: 640 },
+    };
+    /** 细柱子曲线参数4 */
+    const thin_pillar_curve_points_4 = {
+      p0: { x: 55, y: 720 },
+      p1: { x: (width - 62) / 2, y: 720 },
+      p2: { x: width - 117, y: 720 },
+    };
 
-    const rebound_pillar_positions_1 = []; // 上方粗柱子位置点1
-    const rebound_pillar_positions_2 = []; // 上方粗柱子位置点2
-    const rebound_pillar_positions_3 = []; // 上方粗柱子位置点3
+    const thick_pillar_positions_1 = []; // 粗柱子位置点1
+    const thick_pillar_positions_2 = []; // 粗柱子位置点2
+    const thick_pillar_positions_3 = []; // 粗柱子位置点3
+    const thin_pillar_positions_1 = []; // 细柱子位置点1
+    const thin_pillar_positions_2 = []; // 细柱子位置点2
+    const thin_pillar_positions_3 = []; // 细柱子位置点3
+    const thin_pillar_positions_4 = []; // 细柱子位置点4
 
-    for (let i = 0; i < 7; i++) {
-      rebound_pillar_positions_1.push(
-        bezier(i / 6, curve_points_1.p0, curve_points_1.p1, curve_points_1.p2)
+    // 粗主子数量
+    const thick_pillar_count = 8;
+    // 细柱子数量
+    const thin_pillar_count = 11;
+
+    for (let i = 0; i < thick_pillar_count; i++) {
+      thick_pillar_positions_1.push(
+        bezier(
+          i / (thick_pillar_count - 1),
+          thick_pillar_curve_points_1.p0,
+          thick_pillar_curve_points_1.p1,
+          thick_pillar_curve_points_1.p2
+        )
       );
-      rebound_pillar_positions_3.push(
-        bezier(i / 6, curve_points_3.p0, curve_points_3.p1, curve_points_3.p2)
+      thick_pillar_positions_3.push(
+        bezier(
+          i / (thick_pillar_count - 1),
+          thick_pillar_curve_points_3.p0,
+          thick_pillar_curve_points_3.p1,
+          thick_pillar_curve_points_3.p2
+        )
       );
     }
-    for (let i = 0; i < 6; i++) {
-      rebound_pillar_positions_2.push(
-        bezier(i / 5, curve_points_2.p0, curve_points_2.p1, curve_points_2.p2)
+    for (let i = 0; i < thick_pillar_count - 1; i++) {
+      thick_pillar_positions_2.push(
+        bezier(
+          i / (thick_pillar_count - 2),
+          thick_pillar_curve_points_2.p0,
+          thick_pillar_curve_points_2.p1,
+          thick_pillar_curve_points_2.p2
+        )
+      );
+    }
+    for (let i = 0; i < thin_pillar_count - 1; i++) {
+      thin_pillar_positions_1.push(
+        bezier(
+          i / (thin_pillar_count - 2),
+          thin_pillar_curve_points_1.p0,
+          thin_pillar_curve_points_1.p1,
+          thin_pillar_curve_points_1.p2
+        )
+      );
+      thin_pillar_positions_3.push(
+        bezier(
+          i / (thin_pillar_count - 2),
+          thin_pillar_curve_points_3.p0,
+          thin_pillar_curve_points_3.p1,
+          thin_pillar_curve_points_3.p2
+        )
+      );
+    }
+    for (let i = 0; i < thin_pillar_count; i++) {
+      thin_pillar_positions_2.push(
+        bezier(
+          i / (thin_pillar_count - 1),
+          thin_pillar_curve_points_2.p0,
+          thin_pillar_curve_points_2.p1,
+          thin_pillar_curve_points_2.p2
+        )
+      );
+      thin_pillar_positions_4.push(
+        bezier(
+          i / (thin_pillar_count - 1),
+          thin_pillar_curve_points_4.p0,
+          thin_pillar_curve_points_4.p1,
+          thin_pillar_curve_points_4.p2
+        )
       );
     }
 
-    // 创建上方粗柱子1
-    rebound_pillar_positions_1.forEach(({ x, y }) => {
-      this.mainScene.matter.add.circle(x, y, 20, { isStatic: true });
+    // 粗主子粗细
+    const thick_pillar_radius = 16;
+    // 细柱子粗细
+    const thin_pillar_radius = 8;
+
+    // 创建粗柱子1
+    thick_pillar_positions_1.forEach(({ x, y }) => {
+      this.mainScene.matter.add.circle(x, y, thick_pillar_radius, {
+        isStatic: true,
+      });
     });
-    // 创建上方粗柱子2
-    rebound_pillar_positions_2.forEach(({ x, y }) => {
-      this.mainScene.matter.add.circle(x, y, 20, { isStatic: true });
+    // 创建粗柱子2
+    thick_pillar_positions_2.forEach(({ x, y }) => {
+      this.mainScene.matter.add.circle(x, y, thick_pillar_radius, {
+        isStatic: true,
+      });
     });
-    rebound_pillar_positions_3.forEach(({ x, y }) => {
-      this.mainScene.matter.add.circle(x, y, 20, { isStatic: true });
+    // 创建粗柱子3
+    thick_pillar_positions_3.forEach(({ x, y }) => {
+      this.mainScene.matter.add.circle(x, y, thick_pillar_radius, {
+        isStatic: true,
+      });
+    });
+    // 创建细柱子1
+    thin_pillar_positions_1.forEach(({ x, y }) => {
+      this.mainScene.matter.add.circle(x, y, thin_pillar_radius, {
+        isStatic: true,
+      });
+    });
+    // 创建细柱子2
+    thin_pillar_positions_2.forEach(({ x, y }) => {
+      this.mainScene.matter.add.circle(x, y, thin_pillar_radius, {
+        isStatic: true,
+      });
+    });
+    // 创建细柱子3
+    thin_pillar_positions_3.forEach(({ x, y }) => {
+      this.mainScene.matter.add.circle(x, y, thin_pillar_radius, {
+        isStatic: true,
+      });
+    });
+    // 创建细柱子4
+    thin_pillar_positions_4.forEach(({ x, y }) => {
+      this.mainScene.matter.add.circle(x, y, thin_pillar_radius, {
+        isStatic: true,
+      });
     });
     // {
     //   p0: { x: 60, y: 280 },
@@ -190,8 +310,11 @@ export class PlayGround {
     //   p2: { x: width - 122, y: 280 },
     // },
 
-    /********************************** 📌📌📌创建反弹柱子和边界引导障碍物 **********************************/
-    /*********************************** 🔴🔴🔴测试小球 ***********************************/
+    /********************************** 📌📌📌创建反弹柱子 **********************************/
+    /********************************** 🚧🚧🚧边界引导障碍物 *******************************/
+    
+    /********************************** 🚧🚧🚧边界引导障碍物 *******************************/
+    /*********************************** 🔴🔴🔴小球 ***********************************/
     const main_ball = this.mainScene.matter.add.circle(
       width - 100,
       height - 80,
@@ -205,7 +328,7 @@ export class PlayGround {
       }
     );
     this.ball = main_ball;
-    /*********************************** 🔴🔴🔴测试小球 ***********************************/
+    /*********************************** 🔴🔴🔴小球 ***********************************/
     /********************************* 📉📉📉创建底部斜坡 *********************************/
     // 创建底部斜坡
     const slope_bottom = this.mainScene.matter.add.trapezoid(
