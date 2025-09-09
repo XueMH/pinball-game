@@ -162,21 +162,21 @@ export class PlayGround {
     };
     /** 细柱子曲线参数2 */
     const thin_pillar_curve_points_2 = {
-      p0: { x: 55, y: 550 },
-      p1: { x: (width - 62) / 2, y: 560 },
-      p2: { x: width - 117, y: 550 },
+      p0: { x: 55, y: 515 },
+      p1: { x: (width - 62) / 2, y: 530 },
+      p2: { x: width - 117, y: 515 },
     };
     /** 细柱子曲线参数3 */
     const thin_pillar_curve_points_3 = {
-      p0: { x: 75, y: 640 },
-      p1: { x: (width - 62) / 2, y: 640 },
-      p2: { x: width - 137, y: 640 },
+      p0: { x: 75, y: 580 },
+      p1: { x: (width - 62) / 2, y: 580 },
+      p2: { x: width - 137, y: 580 },
     };
     /** 细柱子曲线参数4 */
     const thin_pillar_curve_points_4 = {
-      p0: { x: 55, y: 720 },
-      p1: { x: (width - 62) / 2, y: 720 },
-      p2: { x: width - 117, y: 720 },
+      p0: { x: 55, y: 630 },
+      p1: { x: (width - 62) / 2, y: 630 },
+      p2: { x: width - 117, y: 630 },
     };
 
     const thick_pillar_positions_1 = []; // 粗柱子位置点1
@@ -262,43 +262,43 @@ export class PlayGround {
     // 细柱子粗细
     const thin_pillar_radius = 8;
 
-    // 创建粗柱子1
+    // 创建粗柱子 - line_1
     thick_pillar_positions_1.forEach(({ x, y }) => {
       this.mainScene.matter.add.circle(x, y, thick_pillar_radius, {
         isStatic: true,
       });
     });
-    // 创建粗柱子2
+    // 创建粗柱子 - line_2
     thick_pillar_positions_2.forEach(({ x, y }) => {
       this.mainScene.matter.add.circle(x, y, thick_pillar_radius, {
         isStatic: true,
       });
     });
-    // 创建粗柱子3
+    // 创建粗柱子 - line_3
     thick_pillar_positions_3.forEach(({ x, y }) => {
       this.mainScene.matter.add.circle(x, y, thick_pillar_radius, {
         isStatic: true,
       });
     });
-    // 创建细柱子1
+    // 创建细柱子 - line_1
     thin_pillar_positions_1.forEach(({ x, y }) => {
       this.mainScene.matter.add.circle(x, y, thin_pillar_radius, {
         isStatic: true,
       });
     });
-    // 创建细柱子2
+    // 创建细柱子 - line_2
     thin_pillar_positions_2.forEach(({ x, y }) => {
       this.mainScene.matter.add.circle(x, y, thin_pillar_radius, {
         isStatic: true,
       });
     });
-    // 创建细柱子3
+    // 创建细柱子 - line_3
     thin_pillar_positions_3.forEach(({ x, y }) => {
       this.mainScene.matter.add.circle(x, y, thin_pillar_radius, {
         isStatic: true,
       });
     });
-    // 创建细柱子4
+    // 创建细柱子 - line_4
     thin_pillar_positions_4.forEach(({ x, y }) => {
       this.mainScene.matter.add.circle(x, y, thin_pillar_radius, {
         isStatic: true,
@@ -312,7 +312,42 @@ export class PlayGround {
 
     /********************************** 📌📌📌创建反弹柱子 **********************************/
     /********************************** 🚧🚧🚧边界引导障碍物 *******************************/
-    
+    const side_barriers = [
+      {
+        position: { x: 20, y: 166 },
+        vertices: [
+          { x: 0, y: 130 },
+          { x: 70, y: 180 },
+          { x: 0, y: 180 },
+        ],
+      },
+      {
+        position: { x: 20, y: 326 },
+        vertices: [
+          { x: 0, y: 130 },
+          { x: 70, y: 180 },
+          { x: 0, y: 180 },
+        ],
+      },
+      {
+        position: { x: 18, y: 496 },
+        vertices: [
+          { x: 0, y: 150 },
+          { x: 56, y: 180 },
+          { x: 0, y: 180 },
+        ],
+      },
+    ];
+    side_barriers.forEach(({ position, vertices }, index) => {
+      const { x, y } = position;
+      this.mainScene.matter.add.trapezoid(x, y, 0, 0, 0, {
+        label: `side_barrier_${index + 1}`,
+        isStatic: true,
+        restitution: 0,
+        friction: 0.01,
+        vertices,
+      });
+    });
     /********************************** 🚧🚧🚧边界引导障碍物 *******************************/
     /*********************************** 🔴🔴🔴小球 ***********************************/
     const main_ball = this.mainScene.matter.add.circle(
@@ -325,6 +360,7 @@ export class PlayGround {
         friction: 0,
         frictionAir: 0.002,
         timeScale: 0.5,
+        density: 0.1,
       }
     );
     this.ball = main_ball;
