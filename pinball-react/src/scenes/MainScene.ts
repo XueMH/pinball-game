@@ -1,7 +1,7 @@
-import Phaser from "phaser";
-import { InputController } from "./InputController";
-import { PlayGround } from "./PlayGround";
-import { debounce } from "lodash";
+import Phaser from 'phaser';
+import { InputController } from './InputController';
+import { PlayGround } from './PlayGround';
+import { debounce } from 'lodash';
 
 export class MainScene extends Phaser.Scene {
   private allBodies!: {
@@ -15,7 +15,7 @@ export class MainScene extends Phaser.Scene {
   private inputController!: InputController;
 
   constructor() {
-    super("MainScene");
+    super('MainScene');
   }
 
   preload() {}
@@ -24,7 +24,7 @@ export class MainScene extends Phaser.Scene {
     const MatterBody = this.matter.body;
 
     // 监听发射台准备就绪事件
-    window.bus.on("LaunchReady", (status: boolean) => {
+    window.bus.on('LaunchReady', (status: boolean) => {
       if (status) {
         this.setReady();
       } else {
@@ -38,7 +38,7 @@ export class MainScene extends Phaser.Scene {
     this.inputController = new InputController(this);
 
     // 游戏场景创建完成
-    window.bus.emit("MainSceneCreated");
+    window.bus.emit('MainSceneCreated');
   }
 
   launchBall(force: number) {
@@ -47,7 +47,7 @@ export class MainScene extends Phaser.Scene {
   }
 
   private setReady = debounce(() => {
-    console.log("小球在发射台上，准备发射");
+    console.log('小球在发射台上，准备发射');
     this.launch_ready = true;
   }, 1000);
 

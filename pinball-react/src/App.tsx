@@ -1,12 +1,20 @@
-import "./App.scss";
-import GameCanvas from "./components/GameCanvas/GameCanvas";
+import React from 'react';
+import { BrowserRouter } from 'react-router-dom';
+import AppRoutes from '@/router'; // 引入我们刚刚创建的路由配置文件
+import { Provider } from 'react-redux';
+import { store, persistor } from './store/store';
+import { PersistGate } from 'redux-persist/integration/react';
 
-function App() {
+const App: React.FC = () => {
   return (
-    <div className="app-container">
-      <GameCanvas />
-    </div>
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <BrowserRouter>
+          <AppRoutes /> {/* 渲染路由 */}
+        </BrowserRouter>
+      </PersistGate>
+    </Provider>
   );
-}
+};
 
 export default App;

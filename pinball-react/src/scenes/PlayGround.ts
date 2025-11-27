@@ -1,12 +1,14 @@
-import { MainScene } from "./MainScene";
-import { bezier } from "@/utils";
-import { debounce } from "lodash";
+import { MainScene } from './MainScene';
+import { bezier } from '@/utils';
+import { debounce } from 'lodash';
 
 export class PlayGround {
   private mainScene: MainScene;
   private bound: Phaser.Physics.Matter.World | undefined;
   private ball: MatterJS.BodyType | undefined;
+  private exit_sensors: MatterJS.BodyType[] = [];
   private slope_bottom: MatterJS.BodyType | undefined;
+  private interceptor: MatterJS.BodyType | undefined;
   private launch_pad: MatterJS.BodyType | undefined;
 
   constructor(scene: MainScene) {
@@ -38,7 +40,7 @@ export class PlayGround {
     // const bound_radius = 120;
     // const bound_curve_offset = 26;
     // 曲线上的点的数量
-    const segments = 100;
+    const segments = 200;
     // ↖️↖️↖️左上角曲线
     const top_left = {
       p0: { x: 0, y: bound_radius },
@@ -71,9 +73,7 @@ export class PlayGround {
     const points_top_right: any[] = [];
     for (let i = 0; i <= segments; i++) {
       const t = i / segments;
-      points_top_right.push(
-        bezier(t, top_right.p0, top_right.p1, top_right.p2)
-      );
+      points_top_right.push(bezier(t, top_right.p0, top_right.p1, top_right.p2));
     }
     points_top_right.push({ x: width, y: 0 });
     const curve_top_right = this.mainScene.matter.add.fromVertices(
@@ -91,17 +91,11 @@ export class PlayGround {
     // 创建轨道墙
     const track_wall_height = height - 100 - bound_radius;
     const track_wall_height_offset = height / 2 + (bound_radius - 100) / 2;
-    const track_wall = this.mainScene.matter.add.rectangle(
-      width - 52,
-      track_wall_height_offset,
-      20,
-      track_wall_height,
-      {
-        isStatic: true,
-        restitution: 1,
-        friction: 0,
-      }
-    );
+    this.mainScene.matter.add.rectangle(width - 52, track_wall_height_offset, 20, track_wall_height, {
+      isStatic: true,
+      restitution: 1,
+      friction: 0,
+    });
     const track_wall_curve_points_static = {
       p0: {
         x: width - 42,
@@ -124,16 +118,11 @@ export class PlayGround {
     }
     points_track_wall_curve.push({ x: width - 62, y: bound_radius });
     // 创建轨道墙上方曲线墙
-    const track_wall_curve = this.mainScene.matter.add.fromVertices(
-      width - 85.5,
-      97,
-      points_track_wall_curve,
-      {
-        isStatic: true,
-        restitution: 1,
-        friction: 0,
-      }
-    );
+    this.mainScene.matter.add.fromVertices(width - 85.5, 97, points_track_wall_curve, {
+      isStatic: true,
+      restitution: 1,
+      friction: 0,
+    });
     /********************************* ⏸️⏸️⏸️创建轨道墙 *********************************/
     /********************************** 📌📌📌创建反弹柱子 **********************************/
     /** 粗柱子曲线参数1 */
@@ -156,27 +145,39 @@ export class PlayGround {
     };
     /** 细柱子曲线参数1 */
     const thin_pillar_curve_points_1 = {
-      p0: { x: 75, y: 460 },
+      p0: { x: 10, y: 440 },
       p1: { x: (width - 62) / 2, y: 480 },
-      p2: { x: width - 137, y: 460 },
+      p2: { x: width - 72, y: 440 },
     };
     /** 细柱子曲线参数2 */
     const thin_pillar_curve_points_2 = {
-      p0: { x: 55, y: 515 },
-      p1: { x: (width - 62) / 2, y: 530 },
-      p2: { x: width - 117, y: 515 },
+      p0: { x: 55, y: 525 },
+      p1: { x: (width - 62) / 2, y: 540 },
+      p2: { x: width - 117, y: 525 },
     };
     /** 细柱子曲线参数3 */
     const thin_pillar_curve_points_3 = {
-      p0: { x: 75, y: 580 },
-      p1: { x: (width - 62) / 2, y: 580 },
-      p2: { x: width - 137, y: 580 },
+      p0: { x: 10, y: 590 },
+      p1: { x: (width - 62) / 2, y: 600 },
+      p2: { x: width - 72, y: 590 },
     };
     /** 细柱子曲线参数4 */
     const thin_pillar_curve_points_4 = {
-      p0: { x: 55, y: 630 },
-      p1: { x: (width - 62) / 2, y: 630 },
-      p2: { x: width - 117, y: 630 },
+      p0: { x: 55, y: 660 },
+      p1: { x: (width - 62) / 2, y: 660 },
+      p2: { x: width - 117, y: 660 },
+    };
+    /** 细柱子曲线参数5 */
+    const thin_pillar_curve_points_5 = {
+      p0: { x: 10, y: 725 },
+      p1: { x: (width - 62) / 2, y: 725 },
+      p2: { x: width - 72, y: 725 },
+    };
+    /** 细柱子曲线参数5 - 出口处 */
+    const thin_pillar_curve_points_6 = {
+      p0: { x: 20, y: 820 },
+      p1: { x: (width - 62) / 2, y: 820 },
+      p2: { x: width - 82, y: 820 },
     };
 
     const thick_pillar_positions_1 = []; // 粗柱子位置点1
@@ -186,12 +187,15 @@ export class PlayGround {
     const thin_pillar_positions_2 = []; // 细柱子位置点2
     const thin_pillar_positions_3 = []; // 细柱子位置点3
     const thin_pillar_positions_4 = []; // 细柱子位置点4
+    const thin_pillar_positions_5 = []; // 细柱子位置点4
+    const thin_pillar_positions_6 = []; // 细柱子位置点5
 
     // 粗主子数量
-    const thick_pillar_count = 8;
+    const thick_pillar_count = 7;
     // 细柱子数量
-    const thin_pillar_count = 11;
+    const thin_pillar_count = 10;
 
+    // 粗柱子位置点
     for (let i = 0; i < thick_pillar_count; i++) {
       thick_pillar_positions_1.push(
         bezier(
@@ -220,10 +224,11 @@ export class PlayGround {
         )
       );
     }
-    for (let i = 0; i < thin_pillar_count - 1; i++) {
+    // 细柱子位置点
+    for (let i = 0; i < thin_pillar_count + 1; i++) {
       thin_pillar_positions_1.push(
         bezier(
-          i / (thin_pillar_count - 2),
+          i / thin_pillar_count,
           thin_pillar_curve_points_1.p0,
           thin_pillar_curve_points_1.p1,
           thin_pillar_curve_points_1.p2
@@ -231,10 +236,18 @@ export class PlayGround {
       );
       thin_pillar_positions_3.push(
         bezier(
-          i / (thin_pillar_count - 2),
+          i / thin_pillar_count,
           thin_pillar_curve_points_3.p0,
           thin_pillar_curve_points_3.p1,
           thin_pillar_curve_points_3.p2
+        )
+      );
+      thin_pillar_positions_5.push(
+        bezier(
+          i / thin_pillar_count,
+          thin_pillar_curve_points_5.p0,
+          thin_pillar_curve_points_5.p1,
+          thin_pillar_curve_points_5.p2
         )
       );
     }
@@ -254,6 +267,12 @@ export class PlayGround {
           thin_pillar_curve_points_4.p1,
           thin_pillar_curve_points_4.p2
         )
+      );
+    }
+    // 出口12个
+    for (let i = 0; i < 13; i++) {
+      thin_pillar_positions_6.push(
+        bezier(i / 12, thin_pillar_curve_points_6.p0, thin_pillar_curve_points_6.p1, thin_pillar_curve_points_6.p2)
       );
     }
 
@@ -304,17 +323,24 @@ export class PlayGround {
         isStatic: true,
       });
     });
-    // {
-    //   p0: { x: 60, y: 280 },
-    //   p1: { x: (width - 42) / 2, y: 300 },
-    //   p2: { x: width - 122, y: 280 },
-    // },
+    // 创建细柱子 - line_5
+    thin_pillar_positions_5.forEach(({ x, y }) => {
+      this.mainScene.matter.add.circle(x, y, thin_pillar_radius, {
+        isStatic: true,
+      });
+    });
+    // 创建细柱子 - line_6
+    thin_pillar_positions_6.forEach(({ x, y }) => {
+      this.mainScene.matter.add.circle(x, y, thin_pillar_radius, {
+        isStatic: true,
+      });
+    });
 
     /********************************** 📌📌📌创建反弹柱子 **********************************/
     /********************************** 🚧🚧🚧边界引导障碍物 *******************************/
     const side_barriers = [
       {
-        position: { x: 20, y: 166 },
+        position: { x: 23, y: 166 },
         vertices: [
           { x: 0, y: 130 },
           { x: 70, y: 180 },
@@ -322,7 +348,15 @@ export class PlayGround {
         ],
       },
       {
-        position: { x: 20, y: 326 },
+        position: { x: width - 85, y: 166 },
+        vertices: [
+          { x: 70, y: 130 },
+          { x: 70, y: 180 },
+          { x: 0, y: 180 },
+        ],
+      },
+      {
+        position: { x: 23, y: 326 },
         vertices: [
           { x: 0, y: 130 },
           { x: 70, y: 180 },
@@ -330,11 +364,59 @@ export class PlayGround {
         ],
       },
       {
-        position: { x: 18, y: 496 },
+        position: { x: width - 85, y: 326 },
+        vertices: [
+          { x: 70, y: 130 },
+          { x: 70, y: 180 },
+          { x: 0, y: 180 },
+        ],
+      },
+      {
+        position: { x: 19, y: 506 },
         vertices: [
           { x: 0, y: 150 },
           { x: 56, y: 180 },
           { x: 0, y: 180 },
+        ],
+      },
+      {
+        position: { x: width - 81, y: 506 },
+        vertices: [
+          { x: 56, y: 150 },
+          { x: 56, y: 180 },
+          { x: 0, y: 180 },
+        ],
+      },
+      {
+        position: { x: 19, y: 641 },
+        vertices: [
+          { x: 0, y: 150 },
+          { x: 56, y: 180 },
+          { x: 0, y: 180 },
+        ],
+      },
+      {
+        position: { x: width - 81, y: 641 },
+        vertices: [
+          { x: 56, y: 150 },
+          { x: 56, y: 180 },
+          { x: 0, y: 180 },
+        ],
+      },
+      {
+        position: { x: 7, y: 795 },
+        vertices: [
+          { x: 0, y: 150 },
+          { x: 20, y: 200 },
+          { x: 0, y: 200 },
+        ],
+      },
+      {
+        position: { x: width - 69, y: 795 },
+        vertices: [
+          { x: 20, y: 150 },
+          { x: 20, y: 200 },
+          { x: 0, y: 200 },
         ],
       },
     ];
@@ -349,49 +431,70 @@ export class PlayGround {
       });
     });
     /********************************** 🚧🚧🚧边界引导障碍物 *******************************/
+    /************************************** 🏁🏁🏁出口 **************************************/
+    // 出口轨道
+    thin_pillar_positions_6.forEach(({ x, y }) => {
+      this.mainScene.matter.add.trapezoid(x, y + 18, 4, 20, 0, {
+        isStatic: true,
+      });
+    });
+    const exit_sensors = [];
+    // 出口传感器
+    for (let i = 1; i < thin_pillar_positions_6.length; i++) {
+      const { x, y } = thin_pillar_positions_6[i];
+      exit_sensors.push(
+        this.mainScene.matter.add.trapezoid(x - 29, y + 18, 40, 20, 0, {
+          label: `sensor_${i}`,
+          isStatic: true,
+          isSensor: true,
+          onCollideCallback() {
+            console.log('小球从', i, '号出口离开');
+          },
+        })
+      );
+    }
+    this.exit_sensors = exit_sensors;
+    /************************************** 🏁🏁🏁出口 **************************************/
     /*********************************** 🔴🔴🔴小球 ***********************************/
-    const main_ball = this.mainScene.matter.add.circle(
-      width - 100,
-      height - 80,
-      20,
-      {
-        label: "main_ball",
-        restitution: 0.8,
-        friction: 0,
-        frictionAir: 0.002,
-        timeScale: 0.5,
-        density: 0.1,
-      }
-    );
+    const main_ball = this.mainScene.matter.add.circle(width - 100, height - 80, 18, {
+      label: 'main_ball',
+      restitution: 0.5,
+      friction: 0,
+      frictionAir: 0.002,
+      timeScale: 0.5,
+      density: 10,
+    });
     this.ball = main_ball;
     /*********************************** 🔴🔴🔴小球 ***********************************/
     /********************************* 📉📉📉创建底部斜坡 *********************************/
     // 创建底部斜坡
-    const slope_bottom = this.mainScene.matter.add.trapezoid(
-      width / 2 - 63,
-      height - 37,
-      0,
-      0,
-      0,
-      {
-        label: "slope_bottom",
-        isStatic: true,
-        restitution: 0,
-        friction: 0.01,
-        vertices: [
-          { x: 0, y: height - 100 },
-          { x: width - 42, y: height - 50 },
-          { x: width - 42, y: height },
-          { x: 0, y: height },
-        ],
-        onCollideCallback() {
-          console.log("小球碰撞到斜坡，滚回发射台");
-          MatterBody.setVelocity(main_ball, { x: 5.0, y: 0.5 });
-        },
-      }
-    );
+    const slope_bottom = this.mainScene.matter.add.trapezoid(width / 2 - 63, height - 37, 0, 0, 0, {
+      label: 'slope_bottom',
+      isStatic: true,
+      restitution: 0,
+      friction: 0.01,
+      vertices: [
+        { x: 0, y: height - 100 },
+        { x: width - 42, y: height - 50 },
+        { x: width - 42, y: height },
+        { x: 0, y: height },
+      ],
+      onCollideCallback() {
+        console.log('小球碰撞到斜坡，滚回发射台');
+        MatterBody.setVelocity(main_ball, { x: 5.0, y: 0.5 });
+      },
+    });
     this.slope_bottom = slope_bottom;
     /********************************* 📉📉📉创建底部斜坡 *********************************/
+
+    /******************************** 🚧🚧🚧斜坡上的拦截器 *******************************/
+    const interceptor = this.mainScene.matter.add.circle(width - 52, height - 70, 5, {
+      label: 'interceptor',
+      isStatic: true,
+      isSensor: true,
+    });
+    this.interceptor = interceptor;
+    /******************************** 🚧🚧🚧斜坡上的拦截器 *******************************/
 
     /********************************* 🚀🚀🚀创建发射台 *********************************/
     const launch_pad_points = [
@@ -402,25 +505,20 @@ export class PlayGround {
       { x: width, y: height },
       { x: width - 42, y: height },
     ];
-    const launch_pad = this.mainScene.matter.add.fromVertices(
-      width - 21,
-      height - 18,
-      launch_pad_points,
-      {
-        isStatic: true,
-        restitution: 0,
-        friction: 1,
-        onCollideCallback() {
-          MatterBody.setVelocity(main_ball, { x: 0.2, y: 0.2 });
-          console.log("小球碰撞到发射台");
-          window.bus.emit("LaunchReady", true);
-        },
-        onCollideEndCallback: () => {
-          console.log("小球离开发射台");
-          window.bus.emit("LaunchReady", false);
-        },
-      }
-    );
+    const launch_pad = this.mainScene.matter.add.fromVertices(width - 21, height - 18, launch_pad_points, {
+      isStatic: true,
+      restitution: 0,
+      friction: 1,
+      onCollideCallback() {
+        MatterBody.setVelocity(main_ball, { x: 0.2, y: 0.2 });
+        console.log('小球碰撞到发射台');
+        window.bus.emit('LaunchReady', true);
+      },
+      onCollideEndCallback: () => {
+        console.log('小球离开发射台');
+        window.bus.emit('LaunchReady', false);
+      },
+    });
     this.launch_pad = launch_pad;
     /********************************* 🚀🚀🚀创建发射台 *********************************/
 
@@ -429,6 +527,8 @@ export class PlayGround {
       ball: this.ball,
       launch_pad: this.launch_pad,
       slope_bottom: this.slope_bottom,
+      interceptor: this.interceptor,
+      exit_sensors: this.exit_sensors,
     };
   }
 }

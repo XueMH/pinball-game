@@ -1,6 +1,6 @@
-import { useEffect, useRef } from "react";
-import Phaser from "phaser";
-import { MainScene } from "@/scenes/MainScene";
+import { useEffect, useRef } from 'react';
+import Phaser from 'phaser';
+import { MainScene } from '@/scenes/MainScene';
 
 export default function GameCanvas() {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -13,26 +13,24 @@ export default function GameCanvas() {
       parent: containerRef.current || undefined,
       width: 800,
       height: 1000,
-      backgroundColor: "#f9f9f9",
+      backgroundColor: '#f9f9f9',
       scale: {
         mode: Phaser.Scale.FIT,
-        autoCenter: Phaser.Scale.CENTER_BOTH,
+        // autoCenter: Phaser.Scale.CENTER_BOTH,
       },
       physics: {
-        default: "matter",
+        default: 'matter',
         matter: {
-          gravity: { x: 0, y: 2.5 },
+          gravity: { x: 0, y: 3 },
           debug: true,
         },
       },
+      canvasStyle: 'margin-top: 0',
       scene: [MainScene],
     };
     gameRef.current = new Phaser.Game(config);
-    window.bus.on("MainSceneCreated", () => {
-      console.log(
-        "收到消息: MainSceneCreated",
-        gameRef.current?.scene.getScene("MainScene")
-      );
+    window.bus.on('MainSceneCreated', () => {
+      console.log('收到消息: MainSceneCreated', gameRef.current?.scene.getScene('MainScene'));
     });
     return () => {
       gameRef.current?.destroy(true);
@@ -40,5 +38,5 @@ export default function GameCanvas() {
     };
   }, []);
 
-  return <div ref={containerRef} className="game-canvas" />;
+  return <div ref={containerRef} className="flex  justify-center items-center" />;
 }

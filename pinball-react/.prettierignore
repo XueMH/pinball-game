@@ -1,0 +1,13 @@
+node_modules/
+dist/
+build/
+coverage/
+*.min.js
+*.min.css
+.DS_Store
+Thumbs.db
+.idea
+.vscode
+*.log
+yarn.lock
+package-lock.json
