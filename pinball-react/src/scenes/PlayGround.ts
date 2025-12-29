@@ -3,13 +3,13 @@ import { bezier } from '@/utils';
 import { debounce } from 'lodash';
 
 export class PlayGround {
-  private mainScene: MainScene;
-  private bound: Phaser.Physics.Matter.World | undefined;
-  private ball: MatterJS.BodyType | undefined;
-  private exit_sensors: MatterJS.BodyType[] = [];
-  private slope_bottom: MatterJS.BodyType | undefined;
-  private interceptor: MatterJS.BodyType | undefined;
-  private launch_pad: MatterJS.BodyType | undefined;
+  mainScene: MainScene;
+  bound: Phaser.Physics.Matter.World | undefined;
+  ball: MatterJS.BodyType | undefined;
+  exit_sensors: MatterJS.BodyType[] = [];
+  slope_bottom: MatterJS.BodyType | undefined;
+  interceptor: MatterJS.BodyType | undefined;
+  launch_pad: MatterJS.BodyType | undefined;
 
   constructor(scene: MainScene) {
     this.mainScene = scene;
@@ -443,7 +443,7 @@ export class PlayGround {
     for (let i = 1; i < thin_pillar_positions_6.length; i++) {
       const { x, y } = thin_pillar_positions_6[i];
       exit_sensors.push(
-        this.mainScene.matter.add.trapezoid(x - 29, y + 18, 40, 20, 0, {
+        this.mainScene.matter.add.trapezoid(x - 29, y + 25, 40, 0.1, 0, {
           label: `sensor_${i}`,
           isStatic: true,
           isSensor: true,
@@ -491,7 +491,7 @@ export class PlayGround {
     const interceptor = this.mainScene.matter.add.circle(width - 52, height - 70, 5, {
       label: 'interceptor',
       isStatic: true,
-      isSensor: true,
+      isSensor: false,
     });
     this.interceptor = interceptor;
     /******************************** 🚧🚧🚧斜坡上的拦截器 *******************************/
@@ -507,7 +507,7 @@ export class PlayGround {
     ];
     const launch_pad = this.mainScene.matter.add.fromVertices(width - 21, height - 18, launch_pad_points, {
       isStatic: true,
-      restitution: 0,
+      restitution: 1,
       friction: 1,
       onCollideCallback() {
         MatterBody.setVelocity(main_ball, { x: 0.2, y: 0.2 });
